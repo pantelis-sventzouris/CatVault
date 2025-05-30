@@ -14,5 +14,10 @@ namespace CatVault.Helpers
             Tags = c.CatTags.Select(ct => ct.TagEntity.Name).ToList(),
             ImageBase64 = Convert.ToBase64String(c.Image)
         };
+
+        public static byte[] MapBase64toArray(string base64)
+        {
+            return Convert.FromBase64String(base64);
+        }
     }
 }

@@ -16,13 +16,13 @@ namespace CatVault.Controllers
         private readonly IBackgroundJobClient _jobs;
         private readonly IConfiguration _config;
         private readonly ILogger<CatsController> _logger;
-        private readonly CatDbContext _db;
-        public CatsController(IBackgroundJobClient jobs, IConfiguration config, ILogger<CatsController> logger, CatDbContext db)
+        private readonly IDataService _dataService;
+        public CatsController(IBackgroundJobClient jobs, IConfiguration config, ILogger<CatsController> logger, IDataService dataService)
         {
             _jobs = jobs;
             _config = config;
             _logger = logger;
-            _db = db;
+            _dataService = dataService;
         }
         [HttpPost("fetch")]
         public IActionResult EnqueueFetch()
@@ -46,10 +46,9 @@ namespace CatVault.Controllers
         {
             try
             {
-                if (_db.Cats == null) { return NotFound(); }
-                var cat = await _db.Cats.Include(c => c.CatTags).ThenInclude(ct => ct.TagEntity).FirstOrDefaultAsync(c => c.Id == id);
-                if (cat == null) return NotFound($"Cat with id: {id} was not found.");
-                return Ok(ApiHelper.MapToDto(cat));
+                var cat = await _dataService.GetCatByIdAsync(id);
+                if (cat == null) { return NotFound($"Cat with id: {id} was not found."); }
+                return Ok(cat);
             }
             catch (Exception ex)
             {
@@ -63,18 +62,14 @@ namespace CatVault.Controllers
         {
             try
             {
-                var query = _db.Cats.AsQueryable();
-                if (!string.IsNullOrEmpty(tag))
+                if (page < 1 || pageSize < 1 || pageSize > 100)
                 {
-                    query = query.Where(c => c.CatTags.Any(ct => ct.TagEntity.Name == tag));
+                    return BadRequest("Page and pageSize must be positive integers, and pageSize cannot exceed 100.");
                 }
-                var items = await query
-                    .Skip((page - 1) * pageSize)
-                    .Take(pageSize)
-                    .Include(c => c.CatTags).ThenInclude(ct => ct.TagEntity)
-                    .ToListAsync();
-                var dtos = items.Select(ApiHelper.MapToDto).ToList();
-                return Ok(dtos);
+                if (string.IsNullOrEmpty(tag)) { return BadRequest("Tag cannot be null or empty."); }
+                var cats = await _dataService.GetManyCatsAsync(tag, page, pageSize);
+                if (cats == null || !cats.Any()) { return NotFound($"No cats found with tag: {tag}"); }
+                return Ok(cats);
             }
             catch (Exception ex)
             {
@@ -88,12 +83,10 @@ namespace CatVault.Controllers
         {
             try
             {
-                var img = await _db.Cats
-                .Where(c => c.Id == id)
-                .Select(c => c.Image)
-                .FirstOrDefaultAsync();
-                if (img == null) return NotFound();
-                return File(img, "image/jpeg");
+                if (id <= 0) return BadRequest("Invalid cat ID.");
+                var catImage = await _dataService.GetCatImageBase64Async(id);
+                if(string.IsNullOrEmpty(catImage)) return NotFound($"Cat image with id: {id} was not found.");
+                return File(ApiHelper.MapBase64toArray(catImage), "image/jpeg");
             }
             catch (Exception ex)
             {

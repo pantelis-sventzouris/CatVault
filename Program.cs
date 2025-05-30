@@ -16,6 +16,7 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddDbContext<CatDbContext>(opt =>
     opt.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
+builder.Services.AddScoped<IDataService, DataService>();
 builder.Services.AddHttpClient<ICatFetchService, CatFetchService>();
 
 builder.Services.AddHangfire(cfg =>

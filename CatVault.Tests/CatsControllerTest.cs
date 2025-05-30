@@ -48,7 +48,7 @@ namespace CatVault.CatVault.Tests
         {
             // Arrange
             var db = GetDbWithCats();
-            var ctrl = new CatsController(null, null, null, db);
+            var ctrl = new CatsController(null, null, null, null);
 
             // Act
             var actionResult = await ctrl.GetAll(tag: null, page: 1, pageSize: 1);
@@ -63,7 +63,7 @@ namespace CatVault.CatVault.Tests
         public async Task GetAll_FilterByTag_ReturnsOnlyMatching()
         {
             var db = GetDbWithCats();
-            var ctrl = new CatsController(null, null, null, db);
+            var ctrl = new CatsController(null, null, null, null);
 
             var result = await ctrl.GetAll(tag: "Playful", page: 1, pageSize: 10);
             var ok = Assert.IsType<OkObjectResult>(result.Result);
