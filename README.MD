@@ -5,7 +5,7 @@ A .NET 8 Web API that fetches cat images from The Cat API, stores them in a SQL 
 ## Prerequisites
 
 * [.NET 8 SDK](https://dotnet.microsoft.com/download)
-* [SQL Server Express](https://www.microsoft.com/en-us/sql-server) (local or remote)
+* [SQL Server Express](https://www.microsoft.com/en-us/sql-server) (local)
 * [Docker](https://www.docker.com/) (optional, for containerized deployment)
 * [Git](https://github.com/pantelis-sventzouris/CatVault.git) (to clone the repo)
 
