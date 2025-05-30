@@ -110,7 +110,7 @@ A multi-stage Dockerfile is provided for containerizing the API:
 
    ```bash
    docker run -d \
-     -e ConnectionStrings__DefaultConnection="Server=YOUR_SERVER;Database=CatVault;User Id=USERNAME;Password=PASSWORD;" \
+     -e ConnectionStrings__DefaultConnection="Server=.\\SQLEXPRESS;Database=CatsDb;Integrated Security=true;Encrypt=true;TrustServerCertificate=true;" \
      -p 80:80 \
      --name catvault-api \
      catvault-api
